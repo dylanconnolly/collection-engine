@@ -1,8 +1,6 @@
 package engine_test
 
 import (
-	"collection-engine/engine"
-	"collection-engine/test_utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +9,9 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/dylanconnolly/collection-engine/engine"
+	"github.com/dylanconnolly/collection-engine/test_utils"
 
 	"github.com/google/go-cmp/cmp"
 )

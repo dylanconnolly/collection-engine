@@ -1,11 +1,12 @@
 package engine_test
 
 import (
-	"collection-engine/engine"
-	"collection-engine/test_utils"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/dylanconnolly/collection-engine/engine"
+	"github.com/dylanconnolly/collection-engine/test_utils"
 )
 
 var tProcessingCfg = engine.ProcessingServiceConfig{

@@ -1,12 +1,13 @@
 package main
 
 import (
-	"collection-engine/engine"
 	"fmt"
 	"log"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/dylanconnolly/collection-engine/engine"
 
 	"gopkg.in/yaml.v3"
 )

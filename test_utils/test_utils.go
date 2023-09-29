@@ -1,13 +1,14 @@
 package test_utils
 
 import (
-	"collection-engine/engine"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"time"
+
+	"github.com/dylanconnolly/collection-engine/engine"
 )
 
 type Service interface {

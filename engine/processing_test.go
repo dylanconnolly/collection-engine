@@ -1,11 +1,12 @@
 package engine_test
 
 import (
-	"collection-engine/engine"
-	"collection-engine/test_utils"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/dylanconnolly/collection-engine/engine"
+	"github.com/dylanconnolly/collection-engine/test_utils"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -188,7 +189,16 @@ func TestProcessMessage(t *testing.T) {
 		ts := test_utils.CreateTestServer(ps, "/messages", "error encountered", 401)
 		defer ts.Close()
 
-		ps.ProcessMessage(&msg)
+		go ps.ProcessMessage(&msg)
+		retry := <-ps.Retries
+		if retry == nil {
+			t.Error("processing errors should add the message to retries channel")
+		}
+		id := retry.Payload.GetID()
+		if id != msg.ID {
+			t.Errorf("failed processing message added to retries should match message sent to processing service. Expected: '%s', got: '%s'", msg.ID, id)
+		}
+
 		l := len(ps.ProcessedMessages)
 		if l != 0 {
 			t.Errorf("message should NOT be added to ProcessedMessage queue, got queue length of: %d", l)

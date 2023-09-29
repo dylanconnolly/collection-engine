@@ -1,11 +1,12 @@
 package engine_test
 
 import (
-	"collection-engine/engine"
-	"collection-engine/test_utils"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/dylanconnolly/collection-engine/engine"
+	"github.com/dylanconnolly/collection-engine/test_utils"
 )
 
 func TestEngineRun(t *testing.T) {
@@ -73,9 +74,13 @@ func TestEngineRun(t *testing.T) {
 		cancel := make(chan bool)
 		ce.Run(cancel)
 
-		for range ce.ProcessingService.ProcessedMessages {
-			fmt.Println("processed")
-		}
+		time.Sleep(2)
+		cancel <- true
+		cancel <- true
+
+		// for range ce.ProcessingService.ProcessedMessages {
+		// 	fmt.Println("processed")
+		// }
 	})
 
 }
