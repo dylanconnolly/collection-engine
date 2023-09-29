@@ -92,7 +92,7 @@ func BuildCollectionEngineConfig(workers, rateLimit, rateLimitDuration int) *eng
 			URL          string        "yaml:\"baseUrl\""
 			Timeout      time.Duration "yaml:\"timeout\""
 			WorkersCount int           "yaml:\"workersCount\""
-		}{},
+		}{URL: "test", Timeout: duration, WorkersCount: workers},
 	}
 	return &cfg
 }

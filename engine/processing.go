@@ -95,7 +95,6 @@ func (c *ProcessingClient) PostMessage(msg Payload) (*ProcessedMessage, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		err = errors.New(fmt.Sprintf("received non 200 response from processing api: '%s, body: %s'", resp.Status, string(body)))
-		log.Print(err)
 		return nil, err
 	}
 
@@ -116,6 +115,7 @@ func (ps *ProcessingService) ProcessMessage(msg *Message) {
 		ps.Retries <- &r
 		return
 	}
+	fmt.Println("process success")
 	ps.ProcessedMessages <- processedMsg
 }
 
@@ -133,13 +133,9 @@ func (ps *ProcessingService) Run() {
 func (ps *ProcessingService) processJob(id int, wg *sync.WaitGroup, jobs <-chan []Message) {
 	defer wg.Done()
 	for j := range jobs {
-		// fmt.Println("worker", id, "picked up new job")
 		for _, msg := range j {
 			msg := msg
-			time.Sleep(1)
-			// fmt.Println("processing job: ", msg.ID)
 			ps.ProcessMessage(&msg)
 		}
 	}
-	fmt.Println("worker", id, "is done.")
 }

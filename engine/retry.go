@@ -8,7 +8,7 @@ import (
 type RetryService struct {
 	ProcessingClient *ProcessingClient
 	Retries          chan *Retry
-	StorageService   string
+	StorageClient    *StorageClient
 }
 
 type Retry struct {
@@ -28,15 +28,17 @@ func (r *Retry) New(service string, payload Payload, channel chan *ProcessedMess
 
 type RetryConfig struct {
 	ProcessingClient *ProcessingClient
+	StorageClient    *StorageClient
 	Retries          chan *Retry
 }
 
 func NewRetryService(cfg *RetryConfig) (*RetryService, error) {
-	if cfg.ProcessingClient == nil || cfg.Retries == nil {
-		return nil, fmt.Errorf("Retry service config: ProcessingClient and Retries cannot be nil. ProcessingClient: %v, Retries: %v", cfg.ProcessingClient, cfg.Retries)
+	if cfg.ProcessingClient == nil || cfg.Retries == nil || cfg.StorageClient == nil {
+		return nil, fmt.Errorf("Retry service config: clients or Retries cannot be nil. ProcessingClient: %v, StorageClient: %v, Retries: %v", cfg.ProcessingClient, cfg.StorageClient, cfg.Retries)
 	}
 	return &RetryService{
 		ProcessingClient: cfg.ProcessingClient,
+		StorageClient:    cfg.StorageClient,
 		Retries:          cfg.Retries,
 	}, nil
 }
@@ -74,13 +76,12 @@ func (rs *RetryService) ProcessRetry(r *Retry) {
 	}
 
 	if r.ServiceName == "storage" {
-		fmt.Println("in storage service retry")
-		// pmsg, err := rs.ProcessingClient.PostMessage(r.Payload)
-		// r.RetryCount++
-		// if err != nil {
-		// 	rs.processRetry(r)
-		// } else {
-		// 	r.OutputChannel <- *pmsg
-		// }
+		err := rs.StorageClient.PostMessage(r.Payload)
+		r.RetryCount++
+		if err != nil {
+			log.Printf("retry attempt %d for messageID='%s' failed", r.RetryCount, r.Payload.GetID())
+			rs.ProcessRetry(r)
+		}
+		return
 	}
 }

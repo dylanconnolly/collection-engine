@@ -92,7 +92,6 @@ func (c *StorageClient) PostMessage(processedMsg Payload) error {
 
 	if resp.StatusCode != http.StatusCreated {
 		err = errors.New(fmt.Sprintf("received non 201 response from storage api: '%s, body: %s'", resp.Status, string(body)))
-		log.Print(err)
 		return err
 	}
 

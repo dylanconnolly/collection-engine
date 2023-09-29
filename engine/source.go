@@ -164,16 +164,12 @@ func (ss *SourceService) HandleError(err error) {
 		switch errResp.StatusCode {
 		case 500:
 			log.Println(errResp)
-			// time.Sleep(errWaitTime)
 		case 429:
 			log.Println(errResp)
-			time.Sleep(backoffDuration)
 		case 401:
 			log.Println(errResp)
-			// time.Sleep(errWaitTime)
 		default:
 			log.Println(errResp)
-			// time.Sleep(errWaitTime)
 		}
 		time.Sleep(errWaitTime)
 	} else {

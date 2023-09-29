@@ -30,8 +30,9 @@ type Config struct {
 type CollectionEngine struct {
 	Cfg               Config
 	ProcessingService *ProcessingService
-	SourceService     *SourceService
 	RetryService      *RetryService
+	SourceService     *SourceService
+	StorageService    *StorageService
 }
 
 type Message struct {
@@ -80,9 +81,18 @@ func buildProcessingConfig(cfg *Config) *ProcessingServiceConfig {
 	}
 }
 
-func buildRetryConfig(pClient *ProcessingClient, retries chan *Retry) *RetryConfig {
+func buildStorageConfig(cfg *Config) *StorageServiceConfig {
+	return &StorageServiceConfig{
+		URL:           cfg.StorageApi.URL,
+		ClientTimeout: cfg.StorageApi.Timeout,
+		WorkerCount:   cfg.StorageApi.WorkersCount,
+	}
+}
+
+func buildRetryConfig(pClient *ProcessingClient, sClient *StorageClient, retries chan *Retry) *RetryConfig {
 	return &RetryConfig{
 		ProcessingClient: pClient,
+		StorageClient:    sClient,
 		Retries:          retries,
 	}
 }
@@ -90,6 +100,7 @@ func buildRetryConfig(pClient *ProcessingClient, retries chan *Retry) *RetryConf
 func NewCollectionEngine(cfg *Config) *CollectionEngine {
 	sourceCfg := buildSourceConfig(cfg)
 	processingCfg := buildProcessingConfig(cfg)
+	storageCfg := buildStorageConfig(cfg)
 
 	source, err := NewSourceService(sourceCfg)
 	if err != nil {
@@ -105,7 +116,16 @@ func NewCollectionEngine(cfg *Config) *CollectionEngine {
 	if err != nil {
 		log.Fatal(err)
 	}
-	retryCfg := buildRetryConfig(processing.Client, retries)
+
+	// attach upstream and downstream queues to storage service
+	storageCfg.ProcessedMessages = processing.ProcessedMessages
+	storageCfg.Retries = retries
+	storage, err := NewStorageService(storageCfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	retryCfg := buildRetryConfig(processing.Client, storage.Client, retries)
 	retryService, err := NewRetryService(retryCfg)
 	if err != nil {
 		log.Fatal(err)
@@ -114,12 +134,14 @@ func NewCollectionEngine(cfg *Config) *CollectionEngine {
 	return &CollectionEngine{
 		SourceService:     source,
 		ProcessingService: processing,
+		StorageService:    storage,
 		RetryService:      retryService,
 	}
 }
 
 func (ce *CollectionEngine) Run(cancel chan bool) {
 	go ce.ProcessingService.Run()
-	go ce.SourceService.Run(cancel)
+	go ce.StorageService.Run()
 	go ce.RetryService.Run(cancel)
+	go ce.SourceService.Run(cancel)
 }
