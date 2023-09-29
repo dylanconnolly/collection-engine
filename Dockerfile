@@ -19,6 +19,6 @@ FROM gcr.io/distroless/base-debian11 AS build-release-stage
 WORKDIR /
 
 COPY --from=build-stage /collection-engine /collection-engine
-COPY --from=build-stage app/config.yaml ./
+# COPY --from=build-stage app/config.yaml ./
 
 ENTRYPOINT ["/collection-engine"]
