@@ -112,6 +112,7 @@ func (ss *StorageService) StoreMessage(processedMsg *ProcessedMessage) {
 }
 
 func (ss *StorageService) Run() {
+	log.Printf("Storage Service started with %d workers", ss.StorageWorkerPool.count)
 	var wg sync.WaitGroup
 	for i := 0; i < ss.StorageWorkerPool.count; i++ {
 		wg.Add(1)

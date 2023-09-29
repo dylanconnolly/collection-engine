@@ -119,6 +119,7 @@ func (ps *ProcessingService) ProcessMessage(msg *Message) {
 }
 
 func (ps *ProcessingService) Run() {
+	log.Printf("Processing Service started with %d workers", ps.WorkerPool.count)
 	var wg sync.WaitGroup
 	for i := 0; i < ps.WorkerPool.count; i++ {
 		wg.Add(1)

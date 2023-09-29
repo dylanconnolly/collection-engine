@@ -28,7 +28,7 @@ func main() {
 }
 
 func readConfig(cfg *engine.Config) {
-	f, err := os.Open("config.yaml")
+	f, err := os.Open("helm/config.yaml")
 	if err != nil {
 		log.Fatalf("error reading config from 'config.yaml': %s", err)
 	}
