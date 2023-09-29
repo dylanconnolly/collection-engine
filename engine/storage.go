@@ -20,8 +20,7 @@ type StorageClient struct {
 type StorageService struct {
 	Client *StorageClient
 	StorageWorkerPool
-	ProcessedMessages chan *ProcessedMessage
-	Retries           chan *Retry
+	Retries chan *Retry
 }
 
 func (ss *StorageService) SetUrl(url string) {
@@ -43,11 +42,11 @@ type StorageServiceConfig struct {
 
 func NewStorageService(cfg *StorageServiceConfig) (*StorageService, error) {
 	if cfg.URL == "" || cfg.ClientTimeout == 0 || cfg.WorkerCount == 0 {
-		return nil, fmt.Errorf("Processing service config: ClientTimeout or WorkerCount cannot be 0, URL cannot be empty. ClientTimeout: %v, WorkerCount: %v, URL: '%v'", cfg.ClientTimeout, cfg.WorkerCount, cfg.URL)
+		return nil, fmt.Errorf("Storage service config: ClientTimeout or WorkerCount cannot be 0, URL cannot be empty. ClientTimeout: %v, WorkerCount: %v, URL: '%v'", cfg.ClientTimeout, cfg.WorkerCount, cfg.URL)
 	}
 
 	if cfg.ProcessedMessages == nil || cfg.Retries == nil {
-		return nil, fmt.Errorf("Processing service config: upstream and downstream channels cannot be nil. Messages: %v, Retries: %v", cfg.ProcessedMessages, cfg.Retries)
+		return nil, fmt.Errorf("Storage service config: upstream and downstream channels cannot be nil. ProcessedMessages: %v, Retries: %v", cfg.ProcessedMessages, cfg.Retries)
 	}
 
 	return &StorageService{
@@ -56,7 +55,6 @@ func NewStorageService(cfg *StorageServiceConfig) (*StorageService, error) {
 			HttpClient: &http.Client{Timeout: cfg.ClientTimeout},
 		},
 		StorageWorkerPool: NewStoragePool(cfg.WorkerCount, cfg.ProcessedMessages),
-		ProcessedMessages: make(chan *ProcessedMessage),
 		Retries:           cfg.Retries,
 	}, nil
 }
@@ -93,13 +91,8 @@ func (c *StorageClient) PostMessage(processedMsg Payload) error {
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		err = errors.New(fmt.Sprintf("received non 200 response from storage api: '%s, body: %s'", resp.Status, string(body)))
+		err = errors.New(fmt.Sprintf("received non 201 response from storage api: '%s, body: %s'", resp.Status, string(body)))
 		log.Print(err)
-		return err
-	}
-
-	err = json.Unmarshal(body, &processedMsg)
-	if err != nil {
 		return err
 	}
 
@@ -116,6 +109,7 @@ func (ss *StorageService) StoreMessage(processedMsg *ProcessedMessage) {
 		return
 	}
 	log.Printf("storage successful for messageID='%s'", processedMsg.ID)
+	return
 }
 
 func (ss *StorageService) Run() {
@@ -131,11 +125,7 @@ func (ss *StorageService) Run() {
 func (ss *StorageService) processJob(id int, wg *sync.WaitGroup, jobs <-chan *ProcessedMessage) {
 	defer wg.Done()
 	for j := range jobs {
-		// fmt.Println("worker", id, "picked up new job")
 		msg := j
-
-		// fmt.Println("processing job: ", msg.ID)
 		ss.StoreMessage(msg)
 	}
-	fmt.Println("worker", id, "is done.")
 }
