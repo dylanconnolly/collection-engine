@@ -1,7 +1,11 @@
 package engine_test
 
 import (
+	"bytes"
 	"fmt"
+	"log"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,10 +21,21 @@ var tProcessingCfg = engine.ProcessingServiceConfig{
 	Retries:       make(chan *engine.Retry),
 }
 
+var tStoragecfg = engine.StorageServiceConfig{
+	URL:               "test",
+	ClientTimeout:     (5 * time.Second),
+	WorkerCount:       3,
+	ProcessedMessages: make(chan *engine.ProcessedMessage),
+	Retries:           make(chan *engine.Retry),
+}
+
+var testStorageService, scfgerr = engine.NewStorageService(&tStoragecfg)
+
 var testProcessingService, cfgerr = engine.NewProcessingService(&tProcessingCfg)
 
 var retryCfg = engine.RetryConfig{
 	ProcessingClient: testProcessingService.Client,
+	StorageClient:    testStorageService.Client,
 	Retries:          make(chan *engine.Retry),
 }
 
@@ -28,7 +43,7 @@ func TestNewRetryService(t *testing.T) {
 	t.Run("should return a new service", func(t *testing.T) {
 		s, err := engine.NewRetryService(&retryCfg)
 		if err != nil {
-			t.Error("new config should not return error when all fields are set.")
+			t.Errorf("new config should not return error when all fields are set. err: %s", err)
 		}
 
 		if s == nil {
@@ -46,6 +61,56 @@ func TestNewRetryService(t *testing.T) {
 	})
 }
 
+func TestStorageRetry(t *testing.T) {
+	pmsg := engine.ProcessedMessage{
+		test_utils.GenerateMockMessages(1)[0],
+		time.Now().UTC().String(),
+	}
+	var retry = engine.Retry{
+		MaxRetries:    2,
+		ServiceName:   "storage",
+		Payload:       &pmsg,
+		OutputChannel: nil,
+	}
+	t.Run("should retry on failures until max retry amount is met", func(t *testing.T) {
+		r, _ := engine.NewRetryService(&retryCfg)
+
+		ts := test_utils.CreateTestServer(testStorageService, "/messages", "error response", 500)
+		defer ts.Close()
+		retryCopy := retry
+		// collect logs
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+		defer func() {
+			log.SetOutput(os.Stderr)
+		}()
+
+		r.ProcessRetry(&retryCopy)
+		output := buf.String()
+		expected := "retry attempt 2"
+		max := "max retry count reached"
+		if !strings.Contains(output, expected) {
+			t.Errorf("expected log output to contain: '%s'", expected)
+		}
+		if !strings.Contains(output, max) {
+			t.Errorf("expected log output to contain: '%s'", max)
+		}
+	})
+
+	t.Run("should return and not retry on successful response", func(t *testing.T) {
+		r, _ := engine.NewRetryService(&retryCfg)
+
+		ts := test_utils.CreateTestServer(testStorageService, "/messages", "created", 201)
+		defer ts.Close()
+
+		retryCopy := retry
+		r.ProcessRetry(&retryCopy)
+
+		if len(r.Retries) > 0 {
+			t.Error("channel should be empty")
+		}
+	})
+}
 func TestProcessRetry(t *testing.T) {
 	msg := test_utils.GenerateMockMessages(1)[0]
 	pmsg := engine.ProcessedMessage{

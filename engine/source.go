@@ -87,7 +87,7 @@ func (c *ApiClient) getMessages() ([]Message, error) {
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
-	fmt.Println("requesting")
+	log.Printf("requesting from Source API, url: %s", url)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request %s", err)
 	}

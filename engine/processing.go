@@ -115,7 +115,6 @@ func (ps *ProcessingService) ProcessMessage(msg *Message) {
 		ps.Retries <- &r
 		return
 	}
-	fmt.Println("process success")
 	ps.ProcessedMessages <- processedMsg
 }
 

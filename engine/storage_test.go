@@ -150,6 +150,7 @@ func TestStoreMessage(t *testing.T) {
 
 		ts := test_utils.CreateTestServer(ss, "/messages", processed, 201)
 		defer ts.Close()
+		// collect log output
 		var buf bytes.Buffer
 		log.SetOutput(&buf)
 		defer func() {

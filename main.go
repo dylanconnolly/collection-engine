@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -16,11 +15,11 @@ func main() {
 	var cfg engine.Config
 	readConfig(&cfg)
 	validateConfig(&cfg)
+	log.Printf("starting Collection-Engine")
 
 	ce := engine.NewCollectionEngine(&cfg)
 	cancel := make(chan bool)
 	ce.Run(cancel)
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 	for {
@@ -42,7 +41,6 @@ func readConfig(cfg *engine.Config) {
 }
 
 func validateConfig(cfg *engine.Config) {
-	fmt.Println("config:", cfg)
 	if cfg.DefaultClientTimeout == 0 {
 		cfg.DefaultClientTimeout = 5 * time.Second
 	}
