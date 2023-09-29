@@ -48,6 +48,15 @@ func (m *Message) GetID() string {
 	return m.ID
 }
 
+type ProcessedMessage struct {
+	Message
+	ProcessingDate string `json:"processing_date"`
+}
+
+func (p *ProcessedMessage) GetID() string {
+	return p.ID
+}
+
 type Payload interface {
 	GetID() string
 }

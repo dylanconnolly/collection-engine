@@ -6,4 +6,4 @@
 1. Run all tests `go run -v -race ./engine/...`
 2. Run specific test file `go run -v -race ./engine/<filename>_test.go`
 3. Report coverage `go test -coverprofile cover.out ./engine/...`
-4. View coverage report in browser `go tools cover -html=cover.out`
+4. View coverage report in browser `go tool cover -html=cover.out`

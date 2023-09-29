@@ -1,12 +1,14 @@
 package engine_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/dylanconnolly/collection-engine/engine"
 	"github.com/dylanconnolly/collection-engine/test_utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestEngineRun(t *testing.T) {
@@ -82,5 +84,96 @@ func TestEngineRun(t *testing.T) {
 		// 	fmt.Println("processed")
 		// }
 	})
+
+}
+
+func TestMessageStruct(t *testing.T) {
+	expected := `{
+		"id": "924c8cfbd9f94155985bf262cf2c3c67",
+		"source": "MessagingSystem",
+		"title": "Where are my pants?",
+		"creation_date": "2030-08-24T17:16:52.228009",
+		"message": "Erlang is known...",
+		"tags": [
+		"no",
+		"collection",
+		"building",
+		"seeing"
+		],
+		"author": "Dominic Mccormick"
+		}`
+	msg := engine.Message{
+		ID:           "924c8cfbd9f94155985bf262cf2c3c67",
+		Source:       "MessagingSystem",
+		Title:        "Where are my pants?",
+		CreationDate: "2030-08-24T17:16:52.228009",
+		Message:      "Erlang is known...",
+		Tags:         []string{"no", "collection", "building", "seeing"},
+		Author:       "Dominic Mccormick",
+	}
+
+	httpResponse := []byte(expected)
+
+	var uMsg engine.Message
+	err := json.Unmarshal(httpResponse, &uMsg)
+	if err != nil {
+		t.Error("should not get error unmarshalling expected message response")
+	}
+
+	httpBody, err := json.Marshal(&msg)
+	if err != nil {
+		t.Error("error marshalling message into json body")
+	}
+
+	if cmp.Equal(expected, string(httpBody)) {
+		t.Errorf("marshalling message into request body, expected:\n%s\ngot:\n%s\n", expected, string(httpBody))
+	}
+}
+
+func TestProcessedMessageStruct(t *testing.T) {
+	expected := `{
+		"id": "924c8cfbd9f94155985bf262cf2c3c67",
+		"source": "MessagingSystem",
+		"title": "Where are my pants?",
+		"creation_date": "2030-08-24T17:16:52.228009",
+		"message": "Erlang is known...",
+		"tags": [
+		"no",
+		"collection",
+		"building",
+		"seeing"
+		],
+		"author": "Dominic Mccormick",
+		"processing_date": "2030-08-24T17:16:52.228009"
+		}`
+	pmsg := engine.ProcessedMessage{
+		engine.Message{
+			ID:           "924c8cfbd9f94155985bf262cf2c3c67",
+			Source:       "MessagingSystem",
+			Title:        "Where are my pants?",
+			CreationDate: "2030-08-24T17:16:52.228009",
+			Message:      "Erlang is known...",
+			Tags:         []string{"no", "collection", "building", "seeing"},
+			Author:       "Dominic Mccormick",
+		},
+		"2030-08-24T17:16:52.228009",
+	}
+
+	httpResponse := []byte(expected)
+
+	var uMsg engine.ProcessedMessage
+	err := json.Unmarshal(httpResponse, &uMsg)
+	if err != nil {
+		t.Errorf("should not get error unmarshalling expected processed response, err: %v", err)
+	}
+
+	httpBody, err := json.Marshal(&pmsg)
+	if err != nil {
+		t.Error("error marshalling message into json body")
+	}
+
+	if cmp.Equal(expected, string(httpBody)) {
+		t.Errorf("marshalling message into request body, expected:\n%s\ngot:\n%s\n", expected, string(httpBody))
+	}
 
 }

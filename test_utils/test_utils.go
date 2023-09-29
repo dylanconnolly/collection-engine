@@ -21,10 +21,9 @@ func GenerateMockMessages(count int) []engine.Message {
 	for i := 1; i <= count; i++ {
 		i := i
 		msg := engine.Message{
-			ID:     fmt.Sprintf("message-id-%d", i),
-			Source: "MessagingSystem",
-			Title:  fmt.Sprintf("Message Title %d", i),
-			// CreationDate: time.Now(),
+			ID:           fmt.Sprintf("message-id-%d", i),
+			Source:       "MessagingSystem",
+			Title:        fmt.Sprintf("Message Title %d", i),
 			CreationDate: "2030-08-24T17:16:52.228009",
 			Message:      fmt.Sprintf("test message %d", i),
 			Tags: []string{

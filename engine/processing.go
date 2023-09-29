@@ -28,15 +28,6 @@ func (ps *ProcessingService) SetUrl(url string) {
 	ps.Client.URL = url
 }
 
-type ProcessedMessage struct {
-	Message
-	ProcessingDate string `json:"processing_date"`
-}
-
-func (p *ProcessedMessage) GetID() string {
-	return p.ID
-}
-
 type WorkerPool struct {
 	count int
 	Jobs  chan []Message
