@@ -147,10 +147,10 @@ func validateConfig(cfg *engine.Config) {
 		cfg.DefaultWorkersCount = 3
 	}
 	if cfg.SourceApi.URL == "" {
-		log.Fatal("Must set Source API base url in config.yaml")
+		log.Fatal("FATAL: Must set Source API base url in helm/config.yaml. Stopping execution.")
 	}
 	if cfg.SourceApi.AuthToken == "" {
-		log.Fatal("Must set Source API auth token in config.yaml")
+		log.Fatal("FATAL: Must set Source API auth token in helm/config.yaml. Stopping execution.")
 	}
 	if cfg.SourceApi.ClientTimeout == 0 {
 		cfg.SourceApi.ClientTimeout = cfg.DefaultClientTimeout
@@ -159,7 +159,7 @@ func validateConfig(cfg *engine.Config) {
 		cfg.SourceApi.RateLimitDuration = 1
 	}
 	if cfg.ProcessingApi.URL == "" {
-		log.Fatal("Must set Processing API base url in config.yaml")
+		log.Fatal("FATAL: Must set Processing API base url in helm/config.yaml. Stopping execution.")
 	}
 	if cfg.ProcessingApi.Timeout == 0 {
 		cfg.ProcessingApi.Timeout = cfg.DefaultClientTimeout
@@ -168,7 +168,7 @@ func validateConfig(cfg *engine.Config) {
 		cfg.ProcessingApi.WorkersCount = cfg.DefaultWorkersCount
 	}
 	if cfg.StorageApi.URL == "" {
-		log.Fatal("Must set Storage API base url in config.yaml")
+		log.Fatal("FATAL: Must set Storage API base url in helm/config.yaml. Stopping execution.")
 	}
 	if cfg.StorageApi.Timeout == 0 {
 		cfg.StorageApi.Timeout = cfg.DefaultClientTimeout
