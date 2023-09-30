@@ -1,0 +1,18 @@
+defaultClientTimeout: 5s
+defaultWorkersCount: 5
+
+sourceApiBaseUrl:
+sourceApiAuthToken: 
+sourceClientTimeout: 
+sourceApiRateLimit: 
+sourceApiRateLimitPeriodSecs: 
+
+processingApiBaseUrl:
+processingClientTimeout: 
+processingWorkersCount: 
+
+
+storageApiBaseUrl: 
+storageClientTimeout: 
+storageWorkersCount:
+
