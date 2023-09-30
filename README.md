@@ -28,6 +28,8 @@ Could refactor the processing and storage services into a single service to DRY 
 
 ## Setup
 1. add configuration values in `helm/config.yaml`:
+
+Example:
 ```
 defaultClientTimeout: 5s
 defaultWorkersCount: 3
