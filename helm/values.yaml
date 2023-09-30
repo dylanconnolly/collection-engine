@@ -8,7 +8,7 @@ image:
   hostname: docker.io
   repository: dconnolly145/collection-engine
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
