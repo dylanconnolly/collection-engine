@@ -47,7 +47,7 @@ storageApiBaseUrl: "https://example3.com"
 storageClientTimeout: 10s
 storageWorkersCount: 2
 ```
-2. The helm chart points to a docker image hosted publicly so you shouldn't need to build or host the image unless you prefer. Ff you have a kubernetes cluster running, deploy to the cluster with helm `helm install <release_name> ./helm/`
+2. The helm chart points to a docker image hosted publicly. If you have a kubernetes cluster running, deploy to the cluster with helm `helm install <release_name> ./helm/`
 
 
 1. If instead you want to build the docker image and host elsewere, 
